@@ -1,5 +1,4 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
 
 const toWei = (num) => ethers.utils.parseEther(num.toString())
 const fromWei = (num) => ethers.utils.formatEther(num)
@@ -42,14 +41,14 @@ describe("MusicNFTMarketplace",function()  // describe() is simply a way to grou
         expect(await nftMarketplace.artist()).to.equal(artist.address);
       });
 
-      it("Should mint them list all the music nfts", async function ()
+      it("Should mint then list all the music nfts", async function ()
       {
         expect(await nftMarketplace.balanceOf(nftMarketplace.address)).to.equal(8);
         // Get each item from the marketItems array then check fields to ensure they are correct
         await Promise.all(prices.map(async (i, indx) =>
         {
           const item = await nftMarketplace.marketItems(indx)
-          expect(item.tokenID).to.equal(indx)
+          expect(item.tokenId).to.equal(indx)
           expect(item.seller).to.equal(deployer.address)
           expect(item.price).to.equal(i)
         }));
@@ -110,7 +109,7 @@ describe("MusicNFTMarketplace",function()  // describe() is simply a way to grou
 
       it("Should track resale item, incr. ether bal by royalty fee, transfer NFT to marketplace and emit MarketItemRelisted event", async function(){
         const resaleprice = toWei(2)
-        const initMaretBal = await ethers.provider.getBalance(nftMarketplace.address)
+        const initMarketBal = await ethers.provider.getBalance(nftMarketplace.address)
         // user1 lists the nft for a price of 2 hoping to flip it and double their money
         await expect(nftMarketplace.connect(user1).resellToken(0, resaleprice, { value: royaltyFee }))
           .to.emit(nftMarketplace, "MarketItemRelisted")
@@ -121,12 +120,12 @@ describe("MusicNFTMarketplace",function()  // describe() is simply a way to grou
           )
           const finalMarketBal = await ethers.provider.getBalance(nftMarketplace.address)
           // Expect final market bal to equal initial + royalty fee
-          expect(+fromWei(finalMarketBal)).to.equal(+fromWei(royaltyFee) + +fromWei(initMaretBal))
+          expect(+fromWei(finalMarketBal)).to.equal(+fromWei(royaltyFee) + +fromWei(initMarketBal))
           // Owner of NFT should now be the marketplace
           expect(await nftMarketplace.ownerOf(0)).to.equal(nftMarketplace.address);
           // Get item from item mapping then check fields to ensure they are correct
           const item = await nftMarketplace.marketItems(0)
-          expect(item.tokenID).to.equal(0)
+          expect(item.tokenId).to.equal(0)
           expect(item.seller).to.equal(user1.address)
           expect(item.price).to.equal(resaleprice)
       });
